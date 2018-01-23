@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+     <script type="text/javascript" src="../common/rem.js"></script>
+      <link rel="stylesheet" type="text/css" href="../css/kalendae.css"/>
+      <style type="text/css">
+            div{margin: .1rem;}
+            .halfDay{
+            width:80px;float:left;color:#fff;padding: .1rem;text-align: center;
+            margin: 5px;
+            }
+            .pm{ background-color: #ccc;}
+            .am{  background-color: #ccc; }
+            .all{ background-color: #ccc; }
+            .time_ctive{background-color: #ff6c00;}
+            .show{
+            clear: both;
+            font-size: 20px;margin: 10px 50px;
+            }
+            .dataL{
+            color: #ff6c00;
+            font-size: 30px;
+            }
+            .date_half{
+            display: none;
+            }
+      </style>
+</head>
+<body>
+
+<!--主体内容-->
+
+这里是多选
+<input type="text" class="auto-kal" data-kal = "mode:'multiple'" style="width: 100%;" />
+<!--<div class="auto-kal" data-kal = "mode:'multiple'"></div>-->
+
+</body>
+<script src="../jquery/jquery-3.2.1.min.js"></script>
+<script src="../jquery/kalendae.standalone.js"></script>
+
+
+<script language="JavaScript">
+ var  select = {},datePick = [],timePick = '', amTime = ':上午', pmTime = ':下午',allTime = ':全天';
+                    //累加请假的时间
+                    function sumTime() {
+                          var dateL = 0;
+                           for(var i=0;i<datePick.length;i++){
+                                if(datePick[i].indexOf(amTime) != -1){
+                                    dateL  += 0.5;
+                                }else if(datePick[i].indexOf(pmTime) != -1){
+                                     dateL += 0.5;
+                                }else if(datePick[i].indexOf(allTime) != -1){
+                                      dateL += 1;
+                                }
+                           }
+                           $('.dataL').html(dateL);
+                    }
+                    //点击上午下午改变当前的值
+                    function changeRadio(now,cha,val) {
+                            for(var i = 0;i< datePick.length;i++){
+                                if(datePick[i].indexOf(now)!=-1 && cha == 'change'){
+                                   //修改上午下午的值
+                                    $(".date_half").css("display","block");
+                                    datePick[i] = now + val ;
+                                    $('.show').html(datePick.join("，"));
+                                    sumTime();
+                                    return false;
+                                }else if(datePick[i].indexOf(now)!=-1 && cha == 'delete'){
+                                    //取消选中则删除点击的日期
+                                    datePick.splice(i,1);
+                                    sumTime();
+                                    $('.show').html(datePick.join("，"));
+                                    return false;
+                                }else if(datePick[i].indexOf(now) ==-1 ){
+                                    $(".date_half").css("display","none");
+                                }
+                            }
+                    }
+var nowChange = '';
+new Kalendae(document.getElementById("datePick"), {
+            months:'',
+            mode:'multiple',
+            subscribe: {
+              'date-clicked': function (date) {
+                     // console.log(date._i ,this.getSelected());
+                    var nowClick = date._i;nowChange = date._i;
+                        //判断日期是否被选中，如果选中则直接push进入数组，如果是点击后没有选中，那就从数组中删除
+                        if(!this.isSelected(nowClick)){
+                        	 $(".date_half").css("display","block");
+                             $('.all').addClass('time_ctive').siblings().removeClass("time_ctive");
+                             console.log(date._i ,!this.isSelected(nowClick));
+                        	//默认是全天被选中,没有则禁止点击
+                         	var timePick = allTime;
+                        	datePick.push( nowClick + timePick);
+                         	sumTime();
+                            //radio的点击事件
+                        }else{
+                             changeRadio(nowClick,'delete');
+                        }
+                    //显示当前请假日期
+                    console.log(datePick);
+                    $('.show').html(datePick.join("，"));
+              }
+            }
+        });
+
+         $(".halfDay").click(
+                                  function(e) {
+                                  $(this).addClass("time_ctive").siblings().removeClass("time_ctive");
+                                  var time = $(this).attr('data-time'),timePick;
+                                  switch (time){
+                                      case 'one':
+                                            timePick = amTime;
+                                            changeRadio(nowChange,'change',timePick);
+                                            break;
+                                      case 'two':
+                                            timePick = pmTime;
+                                            changeRadio(nowChange,'change',timePick);
+                                            break;
+                                      case 'three':
+                                            timePick = allTime;
+                                            changeRadio(nowChange,'change',timePick);
+                                            break;
+
+                                  }
+        });
+
+
+
+
+</script>
+ </html>
